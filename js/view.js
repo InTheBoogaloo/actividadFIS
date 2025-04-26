@@ -8,12 +8,12 @@ export default class View {
     this.table = document.getElementById('table');
     this.addTodoForm = new AddTodo();
     this.modal = new Modal();
-    this.filters = new Filters();
+
     
 
     this.addTodoForm.onClick((title, description) => this.addTodo(title, description));
     this.modal.onClick((id, values) => this.editTodo(id, values));
-    this.filters.onClick((filters) => this.filter(filters));
+
   }
 
   setModel(model) {
@@ -23,32 +23,6 @@ export default class View {
   render() {
     const todos = this.model.getTodos();
     todos.forEach((todo) => this.createRow(todo));
-  }
-
-  filter(filters) {
-    const { type, words } = filters;
-    const [, ...rows] = this.table.getElementsByTagName('tr');
-    for (const row of rows) {
-      const [title, description, completed] = row.children;
-      let shouldHide = false;
-
-      if (words) {
-        shouldHide = !title.innerText.includes(words) && !description.innerText.includes(words);
-      }
-
-      const shouldBeCompleted = type === 'completed';
-      const isCompleted = completed.children[0].checked;
-
-      if (type !== 'all' && shouldBeCompleted !== isCompleted) {
-        shouldHide = true;
-      }
-
-      if (shouldHide) {
-        row.classList.add('d-none');
-      } else {
-        row.classList.remove('d-none');
-      }
-    }
   }
 
   addTodo(title, description) {
