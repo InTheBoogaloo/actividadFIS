@@ -1,0 +1,63 @@
+/**
+ * @jest-environment jsdom
+ */
+
+const View = require('./view.js'); // Ajusta el path si es diferente
+
+describe('View - filter()', () => {
+  let view;
+  let mockModel;
+
+  beforeEach(() => {
+    // Crea una tabla en el DOM
+    document.body.innerHTML = `
+      <table id="table">
+        <tr>
+          <th>Title</th><th>Description</th><th>Completed</th>
+        </tr>
+      </table>
+    `;
+
+    // Instancia la vista
+    view = new View();
+
+    // Mock del modelo
+    mockModel = {
+      getTodos: () => [],
+      addTodo: jest.fn(),
+    };
+    view.setModel(mockModel);
+
+    // Crea filas de ejemplo
+    const todos = [
+      { id: '1', title: 'Comprar pan', description: 'Pan integral', dueDate: '2025-05-01', completed: false },
+      { id: '2', title: 'Estudiar', description: 'Arquitectura de computadores', dueDate: '2025-05-02', completed: true },
+    ];
+
+    todos.forEach(todo => view.createRow(todo));
+  });
+
+  test('filtro por palabra clave', () => {
+    view.filter({ type: 'all', words: 'pan' });
+
+    const rows = [...document.querySelectorAll('#table tr')].slice(1); // Ignora encabezado
+    expect(rows[0].classList.contains('d-none')).toBe(false); // contiene "pan"
+    expect(rows[1].classList.contains('d-none')).toBe(true);  // no contiene "pan"
+  });
+
+  test('filtro por completados', () => {
+    view.filter({ type: 'completed', words: '' });
+
+    const rows = [...document.querySelectorAll('#table tr')].slice(1);
+    expect(rows[0].classList.contains('d-none')).toBe(true);  // no está completado
+    expect(rows[1].classList.contains('d-none')).toBe(false); // sí está completado
+  });
+
+  test('filtro combinado: palabra y completado', () => {
+    view.filter({ type: 'completed', words: 'Estudiar' });
+
+    const rows = [...document.querySelectorAll('#table tr')].slice(1);
+    expect(rows[0].classList.contains('d-none')).toBe(true);
+    expect(rows[1].classList.contains('d-none')).toBe(false);
+  });
+});
